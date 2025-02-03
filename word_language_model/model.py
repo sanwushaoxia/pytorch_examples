@@ -82,9 +82,13 @@ class PositionalEncoding(nn.Module):
         super(PositionalEncoding, self).__init__()
         self.dropout = nn.Dropout(p=dropout)
 
+        # torch.Size([max_len, d_model]) 的零矩阵
         pe = torch.zeros(max_len, d_model)
+        # torch.Size([max_len, 1]) 的矩阵, 元素值从 0 到 max_len - 1
         position = torch.arange(0, max_len, dtype=torch.float).unsqueeze(1)
+        # torch.Size([d_model/2]) 的矩阵, 这里为了防止溢出, 采用先 log 再 exp 的计算步骤
         div_term = torch.exp(torch.arange(0, d_model, 2).float() * (-math.log(10000.0) / d_model))
+        # 公式源于 Attention Is All You Need 3.5
         pe[:, 0::2] = torch.sin(position * div_term)
         pe[:, 1::2] = torch.cos(position * div_term)
         pe = pe.unsqueeze(0).transpose(0, 1)
